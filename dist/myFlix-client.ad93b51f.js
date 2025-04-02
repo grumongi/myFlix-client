@@ -16312,11 +16312,11 @@ const MainView = ()=>{
     const [movies, setMovies] = (0, _react.useState)([
         {
             id: 1,
-            title: "Inception",
-            description: "A thief who enters the dreams of others to steal secrets is given a chance to have his past crimes forgiven.",
-            image: "https://m.media-amazon.com/images/I/51s+VXcJ9vL._AC_.jpg",
-            genre: "Science Fiction",
-            director: "Christopher Nolan"
+            title: "The Shawshank Redemption",
+            description: "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
+            image: "https://m.media-amazon.com/images/I/51NiGlapXlL._AC_.jpg",
+            genre: "Drama",
+            director: "Frank Darabont"
         },
         {
             id: 2,
@@ -16366,7 +16366,7 @@ const MainView = ()=>{
         columnNumber: 5
     }, undefined);
 };
-_s(MainView, "SxmvX0lT+6FDBnK/FmfFGKtesd8=");
+_s(MainView, "U43teqijFejTCdvZUTfbA6tq6+Y=");
 _c = MainView;
 var _c;
 $RefreshReg$(_c, "MainView");
