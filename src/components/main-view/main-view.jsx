@@ -1,53 +1,81 @@
-import { useState } from 'react';
-import { MovieCard } from '../movie-card/movie-card';
-import { MovieView } from '../movie-view/movie-view';
+import { MovieCard } from "../movie-card/movie-card";
+import { MovieView } from "../movie-view/movie-view";
+import { useState, useEffect } from "react";
 
 export const MainView = () => {
-  const [movies, setMovies] = useState([
-    {
-      id: 1,
-      title: "The Shawshank Redemption",
-      description: "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
-      image: "https://m.media-amazon.com/images/I/51NiGlapXlL._AC_.jpg",
-      genre: "Drama",
-      director: "Frank Darabont"
-    },
-    {
-      id: 2,
-      title: "The Matrix",
-      description: "A computer hacker learns about the true nature of reality and his role in the war against its controllers.",
-      image: "https://m.media-amazon.com/images/I/51EG732BV3L.jpg",
-      genre: "Action, Sci-Fi",
-      director: "Lana Wachowski, Lilly Wachowski",
-    },
-    {
-      id: 3,
-      title: "Interstellar",
-      description: "A team of explorers travels through a wormhole in space in an attempt to ensure humanity's survival.",
-      image: "https://m.media-amazon.com/images/I/91kFYg4fX3L._AC_SY679_.jpg",
-      genre: "Adventure, Drama, Sci-Fi",
-      director: "Christopher Nolan",
-    },
-  ]);
+  const url = "https://cinema-center-api-2025-64a4a412d09b.herokuapp.com/movies";
+  const [movies, setMovies] = useState([]);
   const [selectedMovie, setSelectedMovie] = useState(null);
 
-  if (selectedMovie) {
-    return <MovieView movie={selectedMovie} onBackClick={() => setSelectedMovie(null)} />;
-  }
+  useEffect(() => {
+    const token = localStorage.getItem("token"); // 
 
-  if (movies.length === 0) {
-    return <div>The list is empty!</div>;
-  }
+    fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`, // 
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log(data);
+        setMovies(data);
+      })
+      .catch((error) => {
+        console.error("Error fetching movies:", error.message || error);
+      });
 
-  return (
-    <div>
-      {movies.map((movie) => (
-        <MovieCard
-          key={movie.id}
-          movie={movie}
-          onMovieClick={(newSelectedMovie) => setSelectedMovie(newSelectedMovie)}
-        />
-      ))}
-    </div>
-  );
+    }, []); // ✅ Add empty dependency array so it runs only once
+
+    if (selectedMovie) {
+        const similarMovies = movies.filter((movie) =>
+            movie.genre?.name === selectedMovie.genre?.name &&
+            movie._id !== selectedMovie._id
+        );
+
+        return (
+            <div>
+                <MovieView
+                    movie={selectedMovie}
+                    onBackClick={() => setSelectedMovie(null)}
+                />
+                <hr />
+                <h2>Similar Movies</h2>
+                {similarMovies.map((movie) => (
+                    <MovieCard
+                        key={movie._id}
+                        movie={movie}
+                        onMovieClick={(newSelection) => {
+                            setSelectedMovie(newSelection);
+                        }}
+                    />
+                ))}
+            </div>
+        );
+    }
+
+    if (movies.length === 0) {
+        return <div>The list is empty!</div>;
+    }
+
+    return (
+        <div>
+            {movies.map((movie) => (
+                <MovieCard
+                    key={movie._id}
+                    movie={movie}
+                    onMovieClick={(newSelection) => {
+                        setSelectedMovie(newSelection);
+                    }}
+                />
+            ))}
+        </div>
+    );
 };
+
