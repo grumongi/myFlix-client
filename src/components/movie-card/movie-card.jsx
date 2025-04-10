@@ -8,7 +8,12 @@ export const MovieCard = ({ movie, onMovieClick }) => {
       }}
       style={{ cursor: "pointer" }}
     >
-      {movie.title}
+      <h3>{movie.title}</h3>
+      <img
+        src={movie.image} // Ensure this points to a valid image URL
+        alt={`${movie.title} poster`}
+        style={{ width: "200px", height: "300px", objectFit: "cover" }} // Adjust styling as needed
+      />
     </div>
   );
 };
@@ -17,7 +22,7 @@ MovieCard.propTypes = {
   movie: PropTypes.shape({
     _id: PropTypes.string,
     title: PropTypes.string.isRequired,
-    image: PropTypes.string,
+    image: PropTypes.string.isRequired,
     genre: PropTypes.oneOfType([
       PropTypes.string,
       PropTypes.shape({
