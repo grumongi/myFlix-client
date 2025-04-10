@@ -1,56 +1,67 @@
 import { MovieCard } from "../movie-card/movie-card";
 import { MovieView } from "../movie-view/movie-view";
+import { LoginView } from "../login-view/login-view";
+import { SignupView } from "../signup-view/signup-view";
 import { useState, useEffect } from "react";
 
 export const MainView = () => {
-  const url = "https://cinema-center-api-2025-64a4a412d09b.herokuapp.com/movies";
-  const [movies, setMovies] = useState([]);
-  const [selectedMovie, setSelectedMovie] = useState(null);
+    const storedUser = localStorage.getItem("user");
+    const storedToken = localStorage.getItem("token");
+    const [user, setUser] = useState(storedUser ? storedUser : null); // Fixed initialization
+    const [token, setToken] = useState(storedToken ? storedToken : null);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token"); // 
+    const urlAPI = "https://cinema-center-api-2025-64a4a412d09b.herokuapp.com";
+    const [movies, setMovies] = useState([]);
+    const [selectedMovie, setSelectedMovie] = useState(null);
 
-    fetch(url, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`, // 
-        "Content-Type": "application/json",
-      },
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
+    useEffect(() => {
+        if (!token) {
+            return;
         }
-        return response.json();
-      })
-      .then((data) => {
-        console.log(data);
-        setMovies(data);
-      })
-      .catch((error) => {
-        console.error("Error fetching movies:", error.message || error);
-      });
+        fetch(urlAPI + "/movies", {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log(data);
+                setMovies(data);
+            });
+    }, [token]);
 
-    }, []); // ✅ Add empty dependency array so it runs only once
+    if (!user) {
+        return (
+            <>
+                <LoginView onLoggedIn={(user, token) => {
+                    setUser(user);
+                    localStorage.setItem("user", user);
+                    setToken(token);
+                    localStorage.setItem("token", token);
+                }} />
+                or
+                <SignupView />
+            </>
+        );
+    }
 
     if (selectedMovie) {
-        const similarMovies = movies.filter((movie) =>
-            movie.genre?.name === selectedMovie.genre?.name &&
-            movie._id !== selectedMovie._id
-        );
-
+        let similarMovies = movies.filter((movie) => {
+            return movie.genre.name === selectedMovie.genre.name;
+        });
+        console.log(similarMovies);
         return (
             <div>
                 <MovieView
                     movie={selectedMovie}
-                    onBackClick={() => setSelectedMovie(null)}
-                />
+                    onBackClick={() => setSelectedMovie(null)} />
                 <hr />
                 <h2>Similar Movies</h2>
-                {similarMovies.map((movie) => (
+                {similarMovies.map((movie, index) => (
                     <MovieCard
-                        key={movie._id}
-                        movie={movie}
+                        key={movie._id || movie.id || index} // Use _id, id, or fallback to index
+                        movie={{
+                            ...movie,
+                            image: movie.image?.imageUrl || "/placeholder.jpg" // Extract imageUrl or use a placeholder
+                        }}
                         onMovieClick={(newSelection) => {
                             setSelectedMovie(newSelection);
                         }}
@@ -66,16 +77,23 @@ export const MainView = () => {
 
     return (
         <div>
-            {movies.map((movie) => (
+            {movies.map((movie, index) => (
                 <MovieCard
-                    key={movie._id}
-                    movie={movie}
+                    key={movie._id || movie.id || index} // Use _id, id, or fallback to index
+                    movie={{
+                        ...movie,
+                        image: movie.image?.imageUrl || "/placeholder.jpg" // Extract imageUrl or use a placeholder
+                    }}
                     onMovieClick={(newSelection) => {
                         setSelectedMovie(newSelection);
                     }}
                 />
             ))}
+            <button onClick={() => {
+                setUser(null);
+                setToken(null);
+                localStorage.clear(); // Clear localStorage on logout
+            }}>Logout</button>
         </div>
     );
 };
-
