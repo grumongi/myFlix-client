@@ -15,12 +15,12 @@ export const SignupView = () => {
         event.preventDefault();
 
         const data = {
-            userName: username,
-            password: password,
-            email: email,
-            firstName: firstname,
-            lastName: lastname,
-            birthDate: birthday
+            Username: username, // Changed from userName to Username
+            Password: password,
+            Email: email,
+            FirstName: firstname, // Changed from firstName to FirstName
+            LastName: lastname,   // Changed from lastName to LastName
+            Birthday: birthday   // Changed from birthDate to Birthday
         };
         console.log(data);
 
@@ -49,7 +49,9 @@ export const SignupView = () => {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required
-                    minLength="3"
+                    minLength="5" // Updated from 3 to 5
+                    pattern="[a-zA-Z0-9]+" // Added pattern to enforce alphanumeric validation
+                    title="Username must be at least 5 characters long and contain only alphanumeric characters"
                 />
             </label>
             <label>
