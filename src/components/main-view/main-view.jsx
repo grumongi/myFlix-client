@@ -2,6 +2,7 @@ import { MovieCard } from "../movie-card/movie-card";
 import { MovieView } from "../movie-view/movie-view";
 import { LoginView } from "../login-view/login-view";
 import { SignupView } from "../signup-view/signup-view";
+import { Row, Col, Button } from "react-bootstrap";
 import { useState, useEffect } from "react";
 
 export const MainView = () => {
@@ -21,10 +22,19 @@ export const MainView = () => {
         fetch(urlAPI + "/movies", {
             headers: { Authorization: `Bearer ${token}` }
         })
-            .then((response) => response.json())
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Failed to fetch movies");
+                }
+                return response.json();
+            })
             .then((data) => {
                 console.log(data);
                 setMovies(data);
+            })
+            .catch((error) => {
+                console.error("Error fetching movies:", error);
+                alert("Failed to load movies. Please try again later.");
             });
     }, [token]);
 
@@ -45,29 +55,32 @@ export const MainView = () => {
 
     if (selectedMovie) {
         let similarMovies = movies.filter((movie) => {
-            return movie.genre.name === selectedMovie.genre.name;
+            return movie.genre.name === selectedMovie.genre.name
+                && movie.title !== selectedMovie.title;
         });
         console.log(similarMovies);
         return (
-            <div>
-                <MovieView
-                    movie={selectedMovie}
-                    onBackClick={() => setSelectedMovie(null)} />
-                <hr />
-                <h2>Similar Movies</h2>
-                {similarMovies.map((movie, index) => (
-                    <MovieCard
-                        key={movie._id || movie.id || index} // Use _id, id, or fallback to index
-                        movie={{
-                            ...movie,
-                            image: movie.image?.imageUrl || "/placeholder.jpg" // Extract imageUrl or use a placeholder
-                        }}
-                        onMovieClick={(newSelection) => {
-                            setSelectedMovie(newSelection);
-                        }}
-                    />
-                ))}
-            </div>
+            <Row className="justify-content-md-center">
+                <Col md={8}>
+                    <MovieView
+                        movie={selectedMovie}   
+                        onBackClick={() => setSelectedMovie(null)} />
+                    <hr />
+                    <h2>Similar Movies</h2>
+                    <Row className="justify-content-md-center">
+                        {similarMovies.map((movie) => (
+                            <Col className="mb-5" key={movie._id} lg={3} md={4} sm={12}>
+                                <MovieCard
+                                    movie={movie} 
+                                    onMovieClick={(newSelection) => {
+                                        setSelectedMovie(newSelection);
+                                    }}
+                                />
+                            </Col>
+                        ))}
+                    </Row>
+                </Col>
+            </Row>
         );
     }
 
@@ -76,24 +89,30 @@ export const MainView = () => {
     }
 
     return (
-        <div>
-            {movies.map((movie, index) => (
-                <MovieCard
-                    key={movie._id || movie.id || index} // Use _id, id, or fallback to index
-                    movie={{
-                        ...movie,
-                        image: movie.image?.imageUrl || "/placeholder.jpg" // Extract imageUrl or use a placeholder
-                    }}
-                    onMovieClick={(newSelection) => {
-                        setSelectedMovie(newSelection);
-                    }}
-                />
+        <Row>
+            {movies.map((movie) => (
+                <Col className="mb-5" key={movie._id} lg={2} md={3} sm={12}>
+                    <MovieCard
+                        movie={movie} 
+                        onMovieClick={(newSelection) => {
+                            setSelectedMovie(newSelection);
+                        }}
+                    />
+                </Col>
             ))}
-            <button onClick={() => {
-                setUser(null);
-                setToken(null);
-                localStorage.clear(); // Clear localStorage on logout
-            }}>Logout</button>
-        </div>
+            <Col sm={12}>
+                <Button
+                    variant="primary"
+                    onClick={() => {
+                        setUser(null);
+                        setToken(null);
+                        localStorage.removeItem("user"); // Clear user from localStorage
+                        localStorage.removeItem("token"); // Clear token from localStorage
+                    }}
+                >
+                    Logout
+                </Button>
+            </Col>
+        </Row>
     );
 };

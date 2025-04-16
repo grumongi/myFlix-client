@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Form, Button, FormLabel } from "react-bootstrap";
 
 export const SignupView = () => {
     // API URL
@@ -41,65 +42,65 @@ export const SignupView = () => {
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            <label>
-                Username:
-                <input
+        <Form onSubmit={handleSubmit}> {/* Removed centering and width control */}
+            <Form.Group>
+                <Form.Label>Username</Form.Label>
+                <Form.Control
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required
-                    minLength="5" // Updated from 3 to 5
-                    pattern="[a-zA-Z0-9]+" // Added pattern to enforce alphanumeric validation
+                    minLength="5"
+                    pattern="[a-zA-Z0-9]+"
                     title="Username must be at least 5 characters long and contain only alphanumeric characters"
                 />
-            </label>
-            <label>
-                Password:
-                <input
+            </Form.Group>
+            <Form.Group>
+                <Form.Label>Password</Form.Label>
+                <Form.Control
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                 />
-            </label>
-            <label>
-                First Name:
-                <input
+            </Form.Group>
+            <Form.Group>
+                <Form.Label>First Name</Form.Label>
+                <Form.Control
                     type="text"
                     value={firstname}
                     onChange={(e) => setFirstname(e.target.value)}
                     required
                 />
-            </label>
-            <label>
-                Last Name:
-                <input
+            </Form.Group>
+            <Form.Group>
+                <Form.Label>Last Name</Form.Label>
+                <Form.Control
                     type="text"
                     value={lastname}
                     onChange={(e) => setLastname(e.target.value)}
                     required
                 />
-            </label>
-            <label>
-                Email:
-                <input
+            </Form.Group>
+            <Form.Group>
+                <Form.Label>Email</Form.Label>
+                <Form.Control
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                 />
-            </label>
-            <label>
-                Birthday:
-                <input
+            </Form.Group>
+            <Form.Group>
+                <Form.Label>Birthday</Form.Label>
+                <Form.Control
                     type="date"
                     value={birthday}
                     onChange={(e) => setBirthday(e.target.value)}
                     required
                 />
-            </label>
-            <button type="submit">Submit</button>
-        </form>
+            </Form.Group>
+            <Button type="submit">Submit</Button> {/* Removed full-width button */}
+        </Form>
     );
 };
