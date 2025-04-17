@@ -1,11 +1,13 @@
 import PropTypes from "prop-types";
+import { Button, Form } from "react-bootstrap";
+import "./movie-view.scss";
 
 export const MovieView = ({ movie, onBackClick }) => {
   return (
     <div>
       <h1>{movie.title}</h1>
       <img
-        src={movie.image} // Reverted to use movie.image directly
+        src={movie.image?.imageUrl} // Corrected to match API syntax
         alt={`${movie.title} poster`}
         style={{ width: "300px", height: "450px", objectFit: "cover" }}
       />
@@ -29,7 +31,9 @@ export const MovieView = ({ movie, onBackClick }) => {
 MovieView.propTypes = {
   movie: PropTypes.shape({
     title: PropTypes.string.isRequired,
-    image: PropTypes.string.isRequired, // Reverted to validate image as a string
+    image: PropTypes.shape({ // Ensure image is an object with imageUrl
+      imageUrl: PropTypes.string.isRequired
+    }).isRequired,
     description: PropTypes.string.isRequired,
     genre: PropTypes.oneOfType([
       PropTypes.string,
