@@ -1,17 +1,23 @@
 import PropTypes from "prop-types";
-import { Button, Form } from "react-bootstrap";
+import { useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "./movie-view.scss";
 
-export const MovieView = ({ movie, onBackClick }) => {
+export const MovieView = ({ movie }) => {
+  const { movieId } = useParams();
+
+  if (!movie) {
+    return <div>Movie not found!</div>;
+  }
+
   return (
     <div>
       <h1>{movie.title}</h1>
       <img
-        src={movie.image?.imageUrl} // Corrected to match API syntax
+        src={movie.image?.imageUrl}
         alt={`${movie.title} poster`}
         style={{ width: "300px", height: "450px", objectFit: "cover" }}
       />
-      
       <p>
         <strong>Genre:</strong>{" "}
         {typeof movie.genre === "object" ? movie.genre.name : movie.genre}
@@ -23,15 +29,18 @@ export const MovieView = ({ movie, onBackClick }) => {
       <p>
         <strong>Description:</strong> {movie.description}
       </p>
-      <button onClick={onBackClick}>Back</button>
+      <Link to="/movies">
+        <button>Back</button>
+      </Link>
     </div>
   );
 };
 
 MovieView.propTypes = {
   movie: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
-    image: PropTypes.shape({ // Ensure image is an object with imageUrl
+    image: PropTypes.shape({
       imageUrl: PropTypes.string.isRequired
     }).isRequired,
     description: PropTypes.string.isRequired,
@@ -47,6 +56,5 @@ MovieView.propTypes = {
         name: PropTypes.string
       })
     ])
-  }).isRequired,
-  onBackClick: PropTypes.func.isRequired
+  }).isRequired
 };
