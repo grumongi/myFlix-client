@@ -31,7 +31,7 @@ export const MainView = () => {
     useEffect(() => {
         if (!token || !user) return;
 
-        console.log("Current User:", user); // Debugging: Log the user object
+        console.log("Current User in MainView:", user); // Debugging: Log the user object
 
         // Fetch user info to refresh frontend data
         fetch(`${urlAPI}/users`, {
@@ -42,10 +42,18 @@ export const MainView = () => {
                 return response.json();
             })
             .then((users) => {
-                const updatedUser = users.find((u) => u.username === user.username); // Ensure correct property
+                const updatedUser = users.find((u) => u.Username === user.Username || u.username === user.username); // match either casing
                 if (updatedUser) {
-                    setUser(updatedUser);
-                    localStorage.setItem("user", JSON.stringify(updatedUser));
+                    const normalizedUser = {
+                        username: updatedUser.Username || updatedUser.username,
+                        email: updatedUser.Email || updatedUser.email,
+                        birthday: updatedUser.Birthday || updatedUser.birthday,
+                        fullName: updatedUser.FullName || updatedUser.fullName || '',
+                        favoriteMovies: updatedUser.FavoriteMovies || updatedUser.favoriteMovies || [],
+                        _id: updatedUser._id,
+                    };
+                    setUser(normalizedUser);
+                    localStorage.setItem("user", JSON.stringify(normalizedUser));
                 }
             })
             .catch((error) => {
@@ -80,9 +88,18 @@ export const MainView = () => {
     };
 
     const handleLogin = (user, token) => {
-        setUser(user);
+        console.log("Logging in user:", user);
+        const normalizedUser = {
+            username: user.Username || user.username,
+            email: user.Email || user.email,
+            birthday: user.Birthday || user.birthday,
+            fullName: user.FullName || user.fullName || '',
+            favoriteMovies: user.FavoriteMovies || user.favoriteMovies || [],
+            _id: user._id,
+        };
+        setUser(normalizedUser);
         setToken(token);
-        localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("user", JSON.stringify(normalizedUser));
         localStorage.setItem("token", token);
     };
 
@@ -139,7 +156,7 @@ export const MainView = () => {
                         <Route
                             path="/profile"
                             element={
-                                user && user.username ? ( // Validate user before rendering ProfileView
+                                user ? (
                                     <ProfileView
                                         urlAPI={urlAPI}
                                         user={user}
@@ -158,4 +175,3 @@ export const MainView = () => {
         </BrowserRouter>
     );
 };
-

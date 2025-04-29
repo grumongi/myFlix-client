@@ -5,28 +5,36 @@ import FavoriteMovies from './favourite-movies';
 import UpdateUser from './update-user';
 
 const ProfileView = ({ urlAPI, user, token, movies }) => {
-    
     useEffect(() => {
         console.log("ProfileView Props:", { urlAPI, user, token, movies });
     }, [urlAPI, user, token, movies]);
 
-   
-    if (!user || !user.username || !user.email) {
-        return <div>Error: User data is missing or invalid. Please log in again.</div>;
-    }
+    // Normalize user object if necessary (in case the props might have different casing)
+    const normalizedUser = {
+        username: user.Username || user.username,
+        email: user.Email || user.email,
+        birthday: user.Birthday || user.birthday,
+        fullName: user.FullName || user.fullName || "N/A", // Use fallback for missing fullName
+        favoriteMovies: user.FavoriteMovies || user.favoriteMovies || [], // Fallback to empty array if missing
+    };
 
-    
-    const formattedBirthday = user.birthday?.$date
-        ? new Date(user.birthday.$date).toISOString().split('T')[0]
+    // Safely format birthday
+    const formattedBirthday = normalizedUser.birthday
+        ? new Date(normalizedUser.birthday).toISOString().split('T')[0]
         : "N/A";
 
+    // Handle favorite movies safely
+    const favoriteMovies = Array.isArray(normalizedUser.favoriteMovies)
+        ? normalizedUser.favoriteMovies.map((fav) => typeof fav === 'object' ? fav._id : fav).filter(Boolean)
+        : [];
+
     return (
-        <>
+        <div style={{ padding: "2rem" }}>
             <h2>Profile</h2>
             <UserInfo
-                username={user.username}
-                email={user.email}
-                fullName={user.fullName}
+                username={normalizedUser.username || "N/A"}
+                email={normalizedUser.email || "N/A"}
+                fullName={normalizedUser.fullName}
                 birthday={formattedBirthday}
             />
             <FavoriteMovies
@@ -34,31 +42,30 @@ const ProfileView = ({ urlAPI, user, token, movies }) => {
                 user={user}
                 token={token}
                 movies={movies}
-                favoriteMovies={user.favoriteMovies.map((fav) => fav.$oid)} // Map favoriteMovies to IDs
+                favoriteMovies={favoriteMovies}
             />
             <UpdateUser
                 urlAPI={urlAPI}
                 user={user}
                 token={token}
             />
-        </>
+        </div>
     );
 };
 
 ProfileView.propTypes = {
     urlAPI: PropTypes.string.isRequired,
     user: PropTypes.shape({
-        username: PropTypes.string.isRequired,
-        email: PropTypes.string.isRequired,
+        username: PropTypes.string,
+        email: PropTypes.string,
         fullName: PropTypes.string,
-        birthday: PropTypes.shape({
-            $date: PropTypes.string,
-        }),
+        birthday: PropTypes.string,
         favoriteMovies: PropTypes.arrayOf(
-            PropTypes.shape({
-                $oid: PropTypes.string.isRequired,
-            })
-        ).isRequired,
+            PropTypes.oneOfType([
+                PropTypes.string, // movie id
+                PropTypes.shape({ _id: PropTypes.string.isRequired }) // movie object
+            ])
+        ),
     }).isRequired,
     token: PropTypes.string.isRequired,
     movies: PropTypes.array.isRequired,
