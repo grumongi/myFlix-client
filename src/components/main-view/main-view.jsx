@@ -2,117 +2,176 @@ import { MovieCard } from "../movie-card/movie-card";
 import { MovieView } from "../movie-view/movie-view";
 import { LoginView } from "../login-view/login-view";
 import { SignupView } from "../signup-view/signup-view";
-import { Row, Col, Button } from "react-bootstrap";
+import { NavigationBar } from "../navigation-bar/navigation-bar";
+import ProfileView from "../profile-view/profile-view";
+
+import { Row, Col } from "react-bootstrap";
 import { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
 
 export const MainView = () => {
     const storedUser = localStorage.getItem("user");
     const storedToken = localStorage.getItem("token");
-    const [user, setUser] = useState(storedUser ? storedUser : null); // Fixed initialization
-    const [token, setToken] = useState(storedToken ? storedToken : null);
+
+    let parsedUser = null;
+    try {
+        parsedUser = storedUser ? JSON.parse(storedUser) : null;
+    } catch (e) {
+        console.error("Invalid user data in localStorage. Clearing it.");
+        localStorage.removeItem("user");
+    }
+
+    const [user, setUser] = useState(parsedUser);
+    const [token, setToken] = useState(storedToken || null);
 
     const urlAPI = "https://cinema-center-api-2025-64a4a412d09b.herokuapp.com";
     const [movies, setMovies] = useState([]);
-    const [selectedMovie, setSelectedMovie] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        if (!token) {
-            return;
-        }
-        fetch(urlAPI + "/movies", {
+        if (!token || !user) return;
+
+        console.log("Current User in MainView:", user); // Debugging: Log the user object
+
+        // Fetch user info to refresh frontend data
+        fetch(`${urlAPI}/users`, {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Failed to fetch movies");
+                if (!response.ok) throw new Error("Failed to fetch user info");
+                return response.json();
+            })
+            .then((users) => {
+                const updatedUser = users.find((u) => u.Username === user.Username || u.username === user.username); // match either casing
+                if (updatedUser) {
+                    const normalizedUser = {
+                        username: updatedUser.Username || updatedUser.username,
+                        email: updatedUser.Email || updatedUser.email,
+                        birthday: updatedUser.Birthday || updatedUser.birthday,
+                        fullName: updatedUser.FullName || updatedUser.fullName || '',
+                        favoriteMovies: updatedUser.FavoriteMovies || updatedUser.favoriteMovies || [],
+                        _id: updatedUser._id,
+                    };
+                    setUser(normalizedUser);
+                    localStorage.setItem("user", JSON.stringify(normalizedUser));
                 }
+            })
+            .catch((error) => {
+                console.error("Error fetching user info:", error);
+            });
+
+        // Fetch movies
+        setIsLoading(true);
+        fetch(`${urlAPI}/movies`, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then((response) => {
+                if (!response.ok) throw new Error("Failed to fetch movies");
                 return response.json();
             })
             .then((data) => {
-                console.log(data);
                 setMovies(data);
             })
             .catch((error) => {
                 console.error("Error fetching movies:", error);
-                alert("Failed to load movies. Please try again later.");
+            })
+            .finally(() => {
+                setIsLoading(false);
             });
-    }, [token]);
+    }, [token, user?.username]);
 
-    if (!user) {
-        return (
-            <>
-                <LoginView onLoggedIn={(user, token) => {
-                    setUser(user);
-                    localStorage.setItem("user", user);
-                    setToken(token);
-                    localStorage.setItem("token", token);
-                }} />
-                or
-                <SignupView />
-            </>
-        );
-    }
+    const handleLogout = () => {
+        setUser(null);
+        setToken(null);
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+    };
 
-    if (selectedMovie) {
-        let similarMovies = movies.filter((movie) => {
-            return movie.genre.name === selectedMovie.genre.name
-                && movie.title !== selectedMovie.title;
-        });
-        console.log(similarMovies);
-        return (
-            <Row className="justify-content-md-center">
-                <Col md={8}>
-                    <MovieView
-                        movie={selectedMovie}   
-                        onBackClick={() => setSelectedMovie(null)} />
-                    <hr />
-                    <h2>Similar Movies</h2>
-                    <Row className="justify-content-md-center">
-                        {similarMovies.map((movie) => (
-                            <Col className="mb-5" key={movie._id} lg={3} md={4} sm={12}>
-                                <MovieCard
-                                    movie={movie} 
-                                    onMovieClick={(newSelection) => {
-                                        setSelectedMovie(newSelection);
-                                    }}
-                                />
-                            </Col>
-                        ))}
-                    </Row>
-                </Col>
-            </Row>
-        );
-    }
+    const handleLogin = (user, token) => {
+        console.log("Logging in user:", user);
+        const normalizedUser = {
+            username: user.Username || user.username,
+            email: user.Email || user.email,
+            birthday: user.Birthday || user.birthday,
+            fullName: user.FullName || user.fullName || '',
+            favoriteMovies: user.FavoriteMovies || user.favoriteMovies || [],
+            _id: user._id,
+        };
+        setUser(normalizedUser);
+        setToken(token);
+        localStorage.setItem("user", JSON.stringify(normalizedUser));
+        localStorage.setItem("token", token);
+    };
 
-    if (movies.length === 0) {
-        return <div>The list is empty!</div>;
-    }
+    const MovieDetails = () => {
+        const { movieId } = useParams();
+        const movie = movies.find((m) => m._id === movieId);
+
+        if (!movie) {
+            return <div>Movie not found!</div>;
+        }
+
+        return <MovieView movie={movie} movies={movies} />;
+    };
 
     return (
-        <Row>
-            {movies.map((movie) => (
-                <Col className="mb-5" key={movie._id} lg={2} md={3} sm={12}>
-                    <MovieCard
-                        movie={movie} 
-                        onMovieClick={(newSelection) => {
-                            setSelectedMovie(newSelection);
-                        }}
-                    />
-                </Col>
-            ))}
-            <Col sm={12}>
-                <Button
-                    variant="primary"
-                    onClick={() => {
-                        setUser(null);
-                        setToken(null);
-                        localStorage.removeItem("user"); // Clear user from localStorage
-                        localStorage.removeItem("token"); // Clear token from localStorage
-                    }}
-                >
-                    Logout
-                </Button>
-            </Col>
-        </Row>
+        <BrowserRouter>
+            <NavigationBar user={user} onLogout={handleLogout} />
+            <Routes>
+                {!user ? (
+                    <>
+                        <Route path="/" element={<Navigate to="/login" replace />} />
+                        <Route path="/login" element={<LoginView onLoggedIn={handleLogin} />} />
+                        <Route path="/signup" element={<SignupView />} />
+                        <Route path="*" element={<Navigate to="/login" replace />} />
+                    </>
+                ) : (
+                    <>
+                        <Route path="/" element={<Navigate to="/movies" replace />} />
+                        <Route
+                            path="/movies"
+                            element={
+                                <Row>
+                                    {isLoading ? (
+                                        <div>Loading...</div>
+                                    ) : movies.length === 0 ? (
+                                        <div>The list is empty!</div>
+                                    ) : (
+                                        movies.map((movie) => (
+                                            <Col
+                                                className="mb-5"
+                                                key={movie._id}
+                                                lg={2}
+                                                md={3}
+                                                sm={12}
+                                            >
+                                                <MovieCard movie={movie} />
+                                            </Col>
+                                        ))
+                                    )}
+                                </Row>
+                            }
+                        />
+                        <Route path="/movies/:movieId" element={<MovieDetails />} />
+                        <Route
+                            path="/profile"
+                            element={
+                                user ? (
+                                    <ProfileView
+                                        urlAPI={urlAPI}
+                                        user={user}
+                                        token={token}
+                                        movies={movies}
+                                    />
+                                ) : (
+                                    <div>Error: User data is missing or invalid. Please log in again.</div>
+                                )
+                            }
+                        />
+                        <Route path="*" element={<Navigate to="/movies" replace />} />
+                    </>
+                )}
+            </Routes>
+        </BrowserRouter>
     );
 };

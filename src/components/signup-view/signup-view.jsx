@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { Form, Button, FormLabel } from "react-bootstrap";
+import { Form, Button } from "react-bootstrap";
 
 export const SignupView = () => {
-    // API URL
     const urlAPI = "https://cinema-center-api-2025-64a4a412d09b.herokuapp.com";
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -11,18 +10,18 @@ export const SignupView = () => {
     const [email, setEmail] = useState("");
     const [birthday, setBirthday] = useState("");
 
-
     const handleSubmit = (event) => {
         event.preventDefault();
 
         const data = {
-            Username: username, // Changed from userName to Username
+            Username: username,
             Password: password,
             Email: email,
-            FirstName: firstname, // Changed from firstName to FirstName
-            LastName: lastname,   // Changed from lastName to LastName
-            Birthday: birthday   // Changed from birthDate to Birthday
+            FirstName: firstname,
+            LastName: lastname,
+            Birthday: birthday
         };
+
         console.log(data);
 
         fetch(urlAPI + "/users", {
@@ -42,7 +41,7 @@ export const SignupView = () => {
     };
 
     return (
-        <Form onSubmit={handleSubmit}> {/* Removed centering and width control */}
+        <Form onSubmit={handleSubmit}>
             <Form.Group>
                 <Form.Label>Username</Form.Label>
                 <Form.Control
@@ -100,7 +99,7 @@ export const SignupView = () => {
                     required
                 />
             </Form.Group>
-            <Button type="submit">Submit</Button> {/* Removed full-width button */}
+            <Button variant="primary" type="submit">Submit</Button>
         </Form>
     );
 };
