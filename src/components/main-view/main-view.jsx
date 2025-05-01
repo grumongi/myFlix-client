@@ -27,6 +27,7 @@ export const MainView = () => {
     const urlAPI = "https://cinema-center-api-2025-64a4a412d09b.herokuapp.com";
     const [movies, setMovies] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [searchQuery, setSearchQuery] = useState(""); // Single search bar for title, genre, and director
 
     useEffect(() => {
         if (!token || !user) return;
@@ -114,6 +115,15 @@ export const MainView = () => {
         return <MovieView movie={movie} movies={movies} />;
     };
 
+    // Filter movies based on the search query
+    const filteredMovies = movies.filter((movie) => {
+        const matchesTitle = movie.title.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesGenre = movie.genre?.name?.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesDirector = movie.director?.name?.toLowerCase().includes(searchQuery.toLowerCase());
+
+        return matchesTitle || matchesGenre || matchesDirector;
+    });
+
     return (
         <BrowserRouter>
             <NavigationBar user={user} onLogout={handleLogout} />
@@ -131,25 +141,36 @@ export const MainView = () => {
                         <Route
                             path="/movies"
                             element={
-                                <Row>
-                                    {isLoading ? (
-                                        <div>Loading...</div>
-                                    ) : movies.length === 0 ? (
-                                        <div>The list is empty!</div>
-                                    ) : (
-                                        movies.map((movie) => (
-                                            <Col
-                                                className="mb-5"
-                                                key={movie._id}
-                                                lg={2}
-                                                md={3}
-                                                sm={12}
-                                            >
-                                                <MovieCard movie={movie} />
-                                            </Col>
-                                        ))
-                                    )}
-                                </Row>
+                                <>
+                                    <div style={{ padding: "1rem" }}>
+                                        <input
+                                            type="text"
+                                            placeholder="Search movies by title, genre, or director..."
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            style={{ width: "100%", padding: "0.5rem", marginBottom: "1rem" }}
+                                        />
+                                    </div>
+                                    <Row>
+                                        {isLoading ? (
+                                            <div>Loading...</div>
+                                        ) : filteredMovies.length === 0 ? (
+                                            <div>No movies match your search!</div>
+                                        ) : (
+                                            filteredMovies.map((movie) => (
+                                                <Col
+                                                    className="mb-5"
+                                                    key={movie._id}
+                                                    lg={2}
+                                                    md={3}
+                                                    sm={12}
+                                                >
+                                                    <MovieCard movie={movie} />
+                                                </Col>
+                                            ))
+                                        )}
+                                    </Row>
+                                </>
                             }
                         />
                         <Route path="/movies/:movieId" element={<MovieDetails />} />
