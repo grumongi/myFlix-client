@@ -27,7 +27,7 @@ myFlix Client is the front-end application for the myFlix project, a web-based m
 ## Installation
 1. Clone the repository:
    ```bash
-   git clone  https://github.com/your-username/myFlix-client.git
+   git clone https://github.com/your-username/myFlix-client.git
    ```
 2. Navigate to the project directory:
    ```bash
@@ -53,8 +53,49 @@ To deploy the application, build the project and host it on a platform like Netl
 npm run build
 ```
 
+## API Documentation
+For detailed API endpoint documentation, including request/response formats, authentication requirements, and example usage, please refer to the [myFlix API Repository](https://github.com/grumongi/movie_api).
+
+The API provides endpoints for:
+- User authentication and registration
+- Movie data retrieval
+- User profile management
+- Favorite movie management
+
 ## API Integration 
 This project communicates with the [myFlix API](https://github.com/grumongi/movie_api). Ensure the API is running and accessible before using the client.
 
-## Link to Client App: 
+## Link to Client App
 https://my-amazing-flix-2025.netlify.app
+
+## Contributing
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/new-feature`)
+3. Commit your changes (`git commit -m 'Add new feature'`)
+4. Push to the branch (`git push origin feature/new-feature`)
+5. Open a Pull Request
+
+## License
+This project is licensed under the MIT License.
+
+## Documentation
+
+This project uses JSDoc for code documentation. To generate the documentation:
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Generate documentation:
+   ```bash
+   npm run docs
+   ```
+
+3. View documentation:
+   Open `docs/index.html` in your browser to view the generated documentation.
+
+The documentation includes:
+- Component descriptions and usage
+- Function parameters and return types
+- Code examples and implementation details

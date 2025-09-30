@@ -4,7 +4,9 @@
   "scripts": {
     "start": "parcel src/index.html",
     "test": "jest",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "docs": "jsdoc -c jsdoc.conf.json",
+    "docs:watch": "jsdoc -c jsdoc.conf.json --watch"
   },
   "repository": {
     "type": "git",
@@ -29,6 +31,7 @@
   "devDependencies": {
     "@parcel/transformer-sass": "^2.14.4",
     "eslint": "^8.0.0",
+    "jsdoc": "^4.0.4",
     "parcel": "^2.14.4",
     "sass": "^1.32.0"
   }

@@ -9,6 +9,11 @@ import { Row, Col } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
 
+/**
+ * MainView component - The main application component that handles routing and user authentication
+ * @component
+ * @returns {React.Component} The main application component with routing
+ */
 export const MainView = () => {
     const storedUser = localStorage.getItem("user");
     const storedToken = localStorage.getItem("token");
@@ -81,6 +86,11 @@ export const MainView = () => {
             });
     }, [token, user?.username]);
 
+    /**
+     * Handles user logout by clearing user data and token
+     * @function handleLogout
+     * @returns {void}
+     */
     const handleLogout = () => {
         setUser(null);
         setToken(null);
@@ -88,6 +98,13 @@ export const MainView = () => {
         localStorage.removeItem("token");
     };
 
+    /**
+     * Handles user login by setting user data and token
+     * @function handleLogin
+     * @param {Object} user - The user object returned from the API
+     * @param {string} token - The JWT token for authentication
+     * @returns {void}
+     */
     const handleLogin = (user, token) => {
         console.log("Logging in user:", user);
         const normalizedUser = {
@@ -104,6 +121,11 @@ export const MainView = () => {
         localStorage.setItem("token", token);
     };
 
+    /**
+     * MovieDetails component for displaying individual movie details
+     * @function MovieDetails
+     * @returns {React.Component} Movie details component or error message
+     */
     const MovieDetails = () => {
         const { movieId } = useParams();
         const movie = movies.find((m) => m._id === movieId);
